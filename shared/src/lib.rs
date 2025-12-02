@@ -130,16 +130,6 @@ pub fn day_name(day: u32) -> &'static str {
     match day {
         1 => "Secret Entrance",
         2 => "Gift Shop",
-        3 => "Mull It Over",
-        4 => "Ceres Search",
-        5 => "Print Queue",
-        6 => "Guard Gallivant",
-        7 => "Bridge Repair",
-        8 => "Resonant Collinearity",
-        9 => "Disk Fragmenter",
-        10 => "Hoof It",
-        11 => "Plutonian Pebbles",
-        12 => "Garden Groups",
         _ => "Unnamed",
     }
 }
