@@ -1,0 +1,28 @@
+[package]
+name = "runner"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+shared = { path = "../shared" }
+day-01 = { path = "../day-01" }
+day-02 = { path = "../day-02" }
+day-03 = { path = "../day-03" }
+day-04 = { path = "../day-04" }
+day-05 = { path = "../day-05" }
+day-06 = { path = "../day-06" }
+day-07 = { path = "../day-07" }
+day-08 = { path = "../day-08" }
+day-09 = { path = "../day-09" }
+day-10 = { path = "../day-10" }
+day-11 = { path = "../day-11" }
+day-12 = { path = "../day-12" }
+
+[dev-dependencies]
+criterion = { version = "0.4", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark"
+harness = false
