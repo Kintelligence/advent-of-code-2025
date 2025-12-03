@@ -11,6 +11,16 @@ impl ToDigit for u8 {
     }
 }
 
+pub trait ParsableDigit: Iterator {
+    fn next_digit(&mut self) -> Option<u8>;
+}
+
+impl<T: Iterator<Item = u8>> ParsableDigit for T {
+    fn next_digit(&mut self) -> Option<u8> {
+        self.next().and_then(|n| n.to_digit())
+    }
+}
+
 pub trait Parsable<T>: Iterator {
     fn next_number(&mut self) -> Option<T>;
 }
