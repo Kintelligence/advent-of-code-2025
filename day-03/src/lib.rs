@@ -1,6 +1,4 @@
-use std::ops::Index;
-
-use shared::{parse::ParsableDigit, *};
+use shared::*;
 
 extern crate shared;
 
@@ -9,28 +7,7 @@ pub const _INPUT: &'static str = include_str!("_input.txt");
 pub fn part_1(_input: &str) -> Solution {
     _input
         .lines()
-        .map(|line| {
-            let mut bytes = line.bytes();
-            let mut top_1: u8 = 0;
-            let mut top_2: u8 = 0;
-            let mut next: Option<u8> = None;
-
-            while let Some(number) = bytes.next_digit() {
-                if number > top_1 {
-                    top_2 = top_1;
-                    top_1 = number;
-                    next = None;
-                } else if next.map_or(true, |n| n < number) {
-                    next = Some(number);
-                }
-            }
-
-            if let Some(n) = next {
-                return top_1 as usize * 10 + n as usize;
-            } else {
-                return top_2 as usize * 10 + top_1 as usize;
-            }
-        })
+        .filter_map(|line| solve(line, 0, 2))
         .sum::<usize>()
         .into()
 }
@@ -54,42 +31,34 @@ mod part_1_tests {
 pub fn part_2(_input: &str) -> Solution {
     _input
         .lines()
-        .map(|line| {
-            let mut bytes = line.bytes();
-            let mut list: Vec<u8> = Vec::new();
-
-            for _ in 0..12 {
-                list.push(bytes.next_digit().unwrap());
-            }
-
-            while let Some(number) = bytes.next_digit() {
-                list.push(number);
-
-                let mut prev = list.first().unwrap();
-                let mut changed = false;
-                for i in 1..13 {
-                    let next = list.index(i);
-                    if next > prev {
-                        list.remove(i - 1);
-                        changed = true;
-                        break;
-                    }
-                    prev = next;
-                }
-
-                if !changed {
-                    list.pop();
-                }
-            }
-
-            let mut sol: usize = 0;
-            for n in list {
-                sol = sol * 10 + n as usize;
-            }
-            sol
-        })
+        .filter_map(|line| solve(line, 0, 12))
         .sum::<usize>()
         .into()
+}
+
+fn solve(line: &str, pos: usize, rem: usize) -> Option<usize> {
+    if rem == 0 {
+        return None;
+    }
+
+    let mut bytes = line.bytes().skip(pos);
+    let mut max = 0;
+    let mut next = 0;
+
+    for i in pos..line.len() - rem + 1 {
+        let a = bytes.next().unwrap();
+        if a > max {
+            max = a;
+            next = i;
+        }
+    }
+
+    if let Some(s) = solve(line, next + 1, rem - 1) {
+        let l = s.checked_ilog10().unwrap_or(0) + 1;
+        Some((max - b'0') as usize * 10_usize.pow(l) + s)
+    } else {
+        Some((max - b'0') as usize)
+    }
 }
 
 #[cfg(test)]
