@@ -218,6 +218,7 @@ dependencies = [
 name = "day-04"
 version = "0.1.0"
 dependencies = [
+ "fxhash",
  "shared",
  "test-case",
 ]
