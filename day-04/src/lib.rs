@@ -45,9 +45,8 @@ mod part_1_tests {
 
 pub fn part_2(_input: &str) -> Solution {
     let mut grid = parse(_input);
-    let mut removed = Grid::filled(false, grid.height, grid.width);
     let mut count: usize = 0;
-    let mut relevant: FxHashSet<Point> = grid.points().collect();
+    let mut relevant: FxHashSet<Point> = grid.points().filter(|&p| grid[p]).collect();
 
     loop {
         if relevant.is_empty() {
@@ -56,21 +55,18 @@ pub fn part_2(_input: &str) -> Solution {
 
         let to_be_removed: Vec<&Point> = relevant
             .iter()
-            .filter(|&&point| {
-                grid[point] && grid.adjacent_eight(point).filter(|&a| grid[a]).count() < 4
-            })
+            .filter(|&&p| grid.adjacent_eight(p).filter(|&n| grid[n]).count() < 4)
             .collect();
 
         for &&point in to_be_removed.iter() {
             grid[point] = false;
-            removed[point] = true;
             count += 1;
         }
 
         relevant = to_be_removed
             .iter()
-            .flat_map(|&&n| grid.adjacent_eight(n))
-            .filter(|&n| !removed[n])
+            .flat_map(|&&p| grid.adjacent_eight(p))
+            .filter(|&p| grid[p])
             .collect();
     }
 
