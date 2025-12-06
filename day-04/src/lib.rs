@@ -1,4 +1,3 @@
-use fxhash::FxHashSet;
 use shared::{grid::Grid, points::point::Point, *};
 
 extern crate shared;
@@ -46,31 +45,23 @@ mod part_1_tests {
 pub fn part_2(_input: &str) -> Solution {
     let mut grid = parse(_input);
     let mut count: usize = 0;
-    let mut relevant: FxHashSet<Point> = grid.points().filter(|&p| grid[p]).collect();
 
-    loop {
-        if relevant.is_empty() {
-            break;
-        }
-
-        let to_be_removed: Vec<&Point> = relevant
-            .iter()
-            .filter(|&&p| grid.adjacent_eight(p).filter(|&n| grid[n]).count() < 4)
-            .collect();
-
-        for &&point in to_be_removed.iter() {
-            grid[point] = false;
-            count += 1;
-        }
-
-        relevant = to_be_removed
-            .iter()
-            .flat_map(|&&p| grid.adjacent_eight(p))
-            .filter(|&p| grid[p])
-            .collect();
+    for point in grid.points() {
+        fill(&point, &mut grid, &mut count);
     }
 
     count.into()
+}
+
+fn fill(point: &Point, grid: &mut Grid<bool>, count: &mut usize) {
+    if grid[*point] && grid.adjacent_eight(*point).filter(|&a| grid[a]).count() < 4 {
+        grid[*point] = false;
+        *count += 1;
+
+        for neighbour in grid.adjacent_eight(*point) {
+            fill(&neighbour, grid, count);
+        }
+    }
 }
 
 #[cfg(test)]

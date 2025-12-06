@@ -65,13 +65,19 @@ fn consolidate(ranges: &mut Vec<Range<usize>>) -> Vec<Range<usize>> {
 pub fn part_1(_input: &str) -> Solution {
     let (mut ranges, ids) = parse(_input);
     let consolidated = consolidate(&mut ranges);
+    let outer_range = Range {
+        start: consolidated.first().unwrap().start,
+        end: consolidated.last().unwrap().end,
+    };
 
     let mut fresh_count: usize = 0;
     for id in ids {
-        for range in consolidated.iter() {
-            if range.contains(&id) {
-                fresh_count += 1;
-                break;
+        if outer_range.contains(&id) {
+            for range in consolidated.iter() {
+                if range.contains(&id) {
+                    fresh_count += 1;
+                    break;
+                }
             }
         }
     }
