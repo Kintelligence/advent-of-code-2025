@@ -11,6 +11,23 @@ impl ToDigit for u8 {
     }
 }
 
+pub trait ParsableNonWhitespaceByte: Iterator {
+    fn next_non_whitespace_byte(&mut self) -> Option<u8>;
+}
+
+impl<T: Iterator<Item = u8>> ParsableNonWhitespaceByte for T {
+    fn next_non_whitespace_byte(&mut self) -> Option<u8> {
+        for byte in self {
+            if byte.is_ascii_whitespace() {
+                continue;
+            }
+
+            return Some(byte);
+        }
+        None
+    }
+}
+
 pub trait ParsableDigit: Iterator {
     fn next_digit(&mut self) -> Option<u8>;
 }
