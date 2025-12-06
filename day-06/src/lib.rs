@@ -1,3 +1,5 @@
+use std::{iter::from_fn, usize};
+
 use shared::{
     parse::{Parsable, ParsableNonWhitespaceByte},
     *,
@@ -59,19 +61,12 @@ pub fn part_2(_input: &str) -> Solution {
 
     loop {
         if let Some(instruction) = instructions.next_non_whitespace_byte() {
-            let mut sum: usize = 0;
+            let iter = from_fn(|| next_column_number(&mut lines));
             if instruction == b'*' {
-                sum = 1;
-                while let Some(number) = next_column_number(&mut lines) {
-                    sum *= number;
-                }
+                solution += iter.fold(1, |acc, x| acc * x);
             } else {
-                while let Some(number) = next_column_number(&mut lines) {
-                    sum += number;
-                }
+                solution += iter.sum::<usize>();
             }
-
-            solution += sum;
         } else {
             break;
         }
