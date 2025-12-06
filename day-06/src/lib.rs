@@ -53,45 +53,47 @@ mod part_1_tests {
 }
 
 pub fn part_2(_input: &str) -> Solution {
-    let mut lines = _input.lines().map(|line| line.bytes()).collect::<Vec<_>>();
+    let mut lines: Vec<std::str::Bytes<'_>> = _input.lines().map(|line| line.bytes()).collect();
     let mut instructions = lines.pop().unwrap();
     let mut solution: usize = 0;
-    let mut numbers: Vec<usize> = Vec::new();
 
     loop {
         if let Some(instruction) = instructions.next_non_whitespace_byte() {
-            numbers.clear();
-
-            loop {
-                let mut number: usize = 0;
-                for line in lines.iter_mut() {
-                    if let Some(next) = line.next()
-                        && next != b' '
-                    {
-                        number = number * 10 + (next - b'0') as usize;
-                    }
+            let mut sum: usize = 0;
+            if instruction == b'*' {
+                sum = 1;
+                while let Some(number) = next_column_number(&mut lines) {
+                    sum *= number;
                 }
-
-                if number == 0 {
-                    break;
+            } else {
+                while let Some(number) = next_column_number(&mut lines) {
+                    sum += number;
                 }
-                numbers.push(number);
             }
 
-            match instruction {
-                b'*' => {
-                    solution += numbers.iter().fold(1, |acc, x| acc * x);
-                }
-                b'+' => {
-                    solution += numbers.iter().sum::<usize>();
-                }
-                _ => {}
-            }
+            solution += sum;
         } else {
             break;
         }
     }
     solution.into()
+}
+
+fn next_column_number(lines: &mut Vec<std::str::Bytes<'_>>) -> Option<usize> {
+    let mut number: usize = 0;
+    for line in lines.iter_mut() {
+        if let Some(next) = line.next()
+            && next != b' '
+        {
+            number = number * 10 + (next - b'0') as usize;
+        }
+    }
+
+    if number == 0 {
+        return None;
+    }
+
+    Some(number)
 }
 
 #[cfg(test)]
