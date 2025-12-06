@@ -26,8 +26,8 @@ pub fn part_1(_input: &str) -> Solution {
                 b'+' => {
                     solution += lines
                         .iter_mut()
-                        .filter_map(|line| line.next_number())
-                        .fold(0, |acc, x: usize| acc + x);
+                        .filter_map(|line| Parsable::<usize>::next_number(line))
+                        .sum::<usize>();
                 }
                 _ => {}
             }
@@ -55,7 +55,7 @@ mod part_1_tests {
 }
 
 pub fn part_2(_input: &str) -> Solution {
-    let mut lines: Vec<std::str::Bytes<'_>> = _input.lines().map(|line| line.bytes()).collect();
+    let mut lines: Vec<_> = _input.lines().map(|line| line.bytes()).collect();
     let mut instructions = lines.pop().unwrap();
     let mut solution: usize = 0;
 
@@ -74,7 +74,7 @@ pub fn part_2(_input: &str) -> Solution {
     solution.into()
 }
 
-fn next_column_number(lines: &mut Vec<std::str::Bytes<'_>>) -> Option<usize> {
+fn next_column_number<T: Iterator<Item = u8>>(lines: &mut Vec<T>) -> Option<usize> {
     let mut number: usize = 0;
     for line in lines.iter_mut() {
         if let Some(next) = line.next()

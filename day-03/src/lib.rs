@@ -7,7 +7,7 @@ pub const _INPUT: &'static str = include_str!("_input.txt");
 pub fn part_1(_input: &str) -> Solution {
     _input
         .lines()
-        .filter_map(|line| solve(line, 0, 2))
+        .filter_map(|line| solve(line.as_bytes(), 0, 2))
         .sum::<usize>()
         .into()
 }
@@ -31,31 +31,29 @@ mod part_1_tests {
 pub fn part_2(_input: &str) -> Solution {
     _input
         .lines()
-        .filter_map(|line| solve(line, 0, 12))
+        .filter_map(|line| solve(line.as_bytes(), 0, 12))
         .sum::<usize>()
         .into()
 }
 
-fn solve(line: &str, pos: usize, rem: usize) -> Option<usize> {
+fn solve(bytes: &[u8], pos: usize, rem: usize) -> Option<usize> {
     if rem == 0 {
         return None;
     }
 
-    let mut bytes = line.bytes().skip(pos);
     let mut max = 0;
     let mut next = 0;
 
-    for i in pos..line.len() - rem + 1 {
-        let a = bytes.next().unwrap();
+    for i in pos..bytes.len() - rem + 1 {
+        let a = bytes[i];
         if a > max {
             max = a;
             next = i;
         }
     }
 
-    if let Some(s) = solve(line, next + 1, rem - 1) {
-        let l = s.checked_ilog10().unwrap_or(0) + 1;
-        Some((max - b'0') as usize * 10_usize.pow(l) + s)
+    if let Some(s) = solve(bytes, next + 1, rem - 1) {
+        Some((max - b'0') as usize * 10_usize.pow(rem as u32 - 1) + s)
     } else {
         Some((max - b'0') as usize)
     }
