@@ -84,11 +84,7 @@ fn next_column_number<T: Iterator<Item = u8>>(lines: &mut Vec<T>) -> Option<usiz
         }
     }
 
-    if number == 0 {
-        return None;
-    }
-
-    Some(number)
+    (number != 0).then(|| number)
 }
 
 #[cfg(test)]
