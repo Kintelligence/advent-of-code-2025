@@ -453,6 +453,13 @@ impl Grid<Option<u8>> {
 impl Grid<bool> {
     pub fn print_bool(&self) -> String {
         let mut str = String::new();
+
+        str.push_str("    ");
+        for x in 0..self.width {
+            str.push_str(&format!("{:} ", x % 10));
+        }
+
+        str.push('\n');
         for y in 0..self.height {
             str.push_str(&format!("{:3} ", y % 1000));
             for x in 0..self.width {

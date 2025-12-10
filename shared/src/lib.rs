@@ -54,6 +54,16 @@ macro_rules! impl_from {
     };
 }
 
+macro_rules! impl_from_ref {
+    ($type_:ident, $kind_:ident) => {
+        impl From<&$type_> for Solution {
+            fn from(sol: &$type_) -> Self {
+                Self::$kind_(*sol)
+            }
+        }
+    };
+}
+
 impl_from!(i8, I8);
 impl_from!(i16, I16);
 impl_from!(i32, I32);
@@ -69,15 +79,35 @@ impl_from!(usize, Usize);
 impl_from!(String, Str);
 impl_from!(Point, Point);
 
+impl_from_ref!(i8, I8);
+impl_from_ref!(i16, I16);
+impl_from_ref!(i32, I32);
+impl_from_ref!(i64, I64);
+impl_from_ref!(i128, I128);
+impl_from_ref!(isize, Isize);
+impl_from_ref!(u8, U8);
+impl_from_ref!(u16, U16);
+impl_from_ref!(u32, U32);
+impl_from_ref!(u64, U64);
+impl_from_ref!(u128, U128);
+impl_from_ref!(usize, Usize);
+impl_from_ref!(Point, Point);
+
 impl From<&str> for Solution {
     fn from(sol: &str) -> Self {
         Self::Str(sol.to_owned())
     }
 }
 
-impl<T> From<Option<T>> for Solution {
-    fn from(_value: Option<T>) -> Self {
-        Self::None
+impl<T> From<Option<T>> for Solution
+where
+    T: Into<Solution>,
+{
+    fn from(value: Option<T>) -> Self {
+        match value {
+            Some(inner) => inner.into(),
+            None => Self::None,
+        }
     }
 }
 
@@ -136,6 +166,7 @@ pub fn day_name(day: u32) -> &'static str {
         6 => "Trash Compactor",
         7 => "Laboratories",
         8 => "Playground",
+        9 => "Movie Theater",
         _ => "Unnamed",
     }
 }

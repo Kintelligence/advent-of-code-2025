@@ -4,8 +4,10 @@ use super::ipoint::IPoint;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct ILine {
-    from: IPoint,
-    to: IPoint,
+    pub min: IPoint,
+    pub max: IPoint,
+    pub from: IPoint,
+    pub to: IPoint,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]
@@ -23,36 +25,64 @@ impl std::fmt::Display for ILine {
 
 impl ILine {
     pub fn new(a: IPoint, b: IPoint) -> Self {
-        let from = a.min(b);
-        let to = a.max(b);
-        ILine { from, to }
+        ILine {
+            min: a.min(b),
+            max: a.max(b),
+            from: a,
+            to: b,
+        }
     }
 
     pub fn len(&self) -> usize {
-        self.from.distance_to(self.to)
+        self.min.distance_to(self.max)
     }
 
-    pub fn contains(&self, point: IPoint) -> bool {
-        (self.to.x - self.from.x) * (point.y - self.from.y)
-            - (self.to.y - self.from.y) * (point.x - self.from.x)
+    pub fn extended_line_contains(&self, point: IPoint) -> bool {
+        (self.max.x - self.min.x) * (point.y - self.min.y)
+            - (self.max.y - self.min.y) * (point.x - self.min.x)
             == 0
     }
 
+    pub fn disc_contains(&self, point: IPoint) -> bool {
+        (point - self.min).dot(point - self.max) <= 0
+    }
+
+    pub fn contains(&self, point: IPoint) -> bool {
+        self.extended_line_contains(point) && self.disc_contains(point)
+    }
+
+    pub fn intersects(&self, other: &ILine) -> bool {
+        Self::cross_points(&self.min, &self.max, &other.min)
+            * Self::cross_points(&self.min, &self.max, &other.max)
+            < 0
+            && Self::cross_points(&other.min, &other.max, &self.min)
+                * Self::cross_points(&other.min, &other.max, &self.max)
+                < 0
+    }
+
+    fn cross_points(a: &IPoint, b: &IPoint, c: &IPoint) -> isize {
+        (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
+    }
+
+    pub fn orient(&self, other: &IPoint) -> isize {
+        (self.to - self.from).cross(other - self.from)
+    }
+
     pub fn points(&self) -> Vec<IPoint> {
-        let dx = self.to.x.abs_diff(self.from.x) as isize;
-        let sx = if self.from.x < self.to.x { 1 } else { -1 };
-        let dy = -(self.to.y.abs_diff(self.from.y) as isize);
-        let sy = if self.from.y < self.to.y { 1 } else { -1 };
+        let dx = self.max.x.abs_diff(self.min.x) as isize;
+        let sx = if self.min.x < self.max.x { 1 } else { -1 };
+        let dy = -(self.max.y.abs_diff(self.min.y) as isize);
+        let sy = if self.min.y < self.max.y { 1 } else { -1 };
         let mut error = dx + dy;
 
         let mut points = Vec::new();
 
-        let mut x = self.from.x;
-        let mut y = self.from.y;
+        let mut x = self.min.x;
+        let mut y = self.min.y;
 
         loop {
             points.push(IPoint::new(x, y));
-            if x == self.to.x && y == self.to.y {
+            if x == self.max.x && y == self.max.y {
                 break;
             }
             let e2 = 2 * error;
@@ -70,28 +100,32 @@ impl ILine {
         points
     }
 
-    pub fn intersect(&self, other: &ILine) -> Intersection {
+    pub fn find_intersect(&self, other: &ILine) -> Intersection {
         // Compute determinants to check relative orientation
-        let d1 = (self.to.x - self.from.x) * (other.from.y - self.from.y)
-            - (self.to.y - self.from.y) * (other.from.x - self.from.x);
-        let d2 = (self.to.x - self.from.x) * (other.to.y - self.from.y)
-            - (self.to.y - self.from.y) * (other.to.x - self.from.x);
+        let d1 = ((self.max.x - self.min.x).strict_mul(other.min.y - self.min.y)
+            - (self.max.y - self.min.y).strict_mul(other.min.x - self.min.x))
+            as i128;
+        let d2 = ((self.max.x - self.min.x).strict_mul(other.max.y - self.min.y)
+            - (self.max.y - self.min.y).strict_mul(other.max.x - self.min.x))
+            as i128;
 
-        let d3 = (other.to.x - other.from.x) * (self.from.y - other.from.y)
-            - (other.to.y - other.from.y) * (self.from.x - other.from.x);
-        let d4 = (other.to.x - other.from.x) * (self.to.y - other.from.y)
-            - (other.to.y - other.from.y) * (self.to.x - other.from.x);
+        let d3 = ((other.max.x - other.min.x).strict_mul(self.min.y - other.min.y)
+            - (other.max.y - other.min.y).strict_mul(self.min.x - other.min.x))
+            as i128;
+        let d4 = ((other.max.x - other.min.x).strict_mul(self.max.y - other.min.y)
+            - (other.max.y - other.min.y).strict_mul(self.max.x - other.min.x))
+            as i128;
 
         // Case 1: Proper intersection
-        if d1 * d2 < 0 && d3 * d4 < 0 {
+        if d1.strict_mul(d2) < 0 && d3.strict_mul(d4) < 0 {
             // Compute the intersection point
-            let a1 = self.to.y - self.from.y;
-            let b1 = self.from.x - self.to.x;
-            let c1 = a1 * self.from.x + b1 * self.from.y;
+            let a1 = self.max.y - self.min.y;
+            let b1 = self.min.x - self.max.x;
+            let c1 = a1 * self.min.x + b1 * self.min.y;
 
-            let a2 = other.to.y - other.from.y;
-            let b2 = other.from.x - other.to.x;
-            let c2 = a2 * other.from.x + b2 * other.from.y;
+            let a2 = other.max.y - other.min.y;
+            let b2 = other.min.x - other.max.x;
+            let c2 = a2 * other.min.x + b2 * other.min.y;
 
             let determinant = a1 * b2 - a2 * b1;
 
@@ -99,8 +133,8 @@ impl ILine {
                 return Intersection::None; // Parallel lines
             }
 
-            let x = (b2 * c1 - b1 * c2) / determinant;
-            let y = (a1 * c2 - a2 * c1) / determinant;
+            let x = (b2.strict_mul(c1) - b1.strict_mul(c2)) / determinant;
+            let y = (a1.strict_mul(c2) - a2.strict_mul(c1)) / determinant;
 
             return Intersection::Point(IPoint::new(x, y));
         }
@@ -108,10 +142,10 @@ impl ILine {
         // Case 2: Collinear lines
         if d1 == 0 && d2 == 0 && d3 == 0 && d4 == 0 {
             // Compute the overlapping range using bounding boxes
-            let overlap_start_x = self.from.x.max(other.from.x);
-            let overlap_end_x = self.to.x.min(other.to.x);
-            let overlap_start_y = self.from.y.max(other.from.y);
-            let overlap_end_y = self.to.y.min(other.to.y);
+            let overlap_start_x = self.min.x.max(other.min.x);
+            let overlap_end_x = self.max.x.min(other.max.x);
+            let overlap_start_y = self.min.y.max(other.min.y);
+            let overlap_end_y = self.max.y.min(other.max.y);
 
             if overlap_start_x > overlap_end_x || overlap_start_y > overlap_end_y {
                 return Intersection::None; // No overlap
@@ -128,17 +162,17 @@ impl ILine {
         }
 
         // Case 3: Endpoint touching or one endpoint lies on the other segment
-        if self.contains(other.from) {
-            return Intersection::Point(other.from);
+        if self.contains(other.min) {
+            return Intersection::Point(other.min);
         }
-        if self.contains(other.to) {
-            return Intersection::Point(other.to);
+        if self.contains(other.max) {
+            return Intersection::Point(other.max);
         }
-        if other.contains(self.from) {
-            return Intersection::Point(self.from);
+        if other.contains(self.min) {
+            return Intersection::Point(self.min);
         }
-        if other.contains(self.to) {
-            return Intersection::Point(self.to);
+        if other.contains(self.max) {
+            return Intersection::Point(self.max);
         }
 
         Intersection::None
@@ -163,7 +197,7 @@ mod iline_tests {
         IPoint::new(0, 0)
     )]
     fn intersection_point_test(a: ILine, b: ILine, expected: IPoint) {
-        assert_eq!(a.intersect(&b), Intersection::Point(expected));
+        assert_eq!(a.find_intersect(&b), Intersection::Point(expected));
     }
 
     #[test_case(
@@ -172,7 +206,7 @@ mod iline_tests {
         ILine::new(IPoint::new(1, 0), IPoint::new(2, 0))
     )]
     fn intersection_line_test(a: ILine, b: ILine, expected: ILine) {
-        assert_eq!(a.intersect(&b), Intersection::Segment(expected));
+        assert_eq!(a.find_intersect(&b), Intersection::Segment(expected));
     }
 
     #[test_case(
@@ -180,7 +214,7 @@ mod iline_tests {
         ILine::new(IPoint::new(0, 0), IPoint::new(0, 2))
     )]
     fn intersection_none_test(a: ILine, b: ILine) {
-        assert_eq!(a.intersect(&b), Intersection::None);
+        assert_eq!(a.find_intersect(&b), Intersection::None);
     }
 
     #[test_case(
@@ -189,6 +223,6 @@ mod iline_tests {
         IPoint::new(4, 6)
     )]
     fn intersection_endpoint_test(a: ILine, b: ILine, point: IPoint) {
-        assert_eq!(a.intersect(&b), Intersection::Point(point));
+        assert_eq!(a.find_intersect(&b), Intersection::Point(point));
     }
 }

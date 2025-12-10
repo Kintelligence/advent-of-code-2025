@@ -72,6 +72,14 @@ impl IPoint {
             last_range: to,
         }
     }
+
+    pub fn dot(&self, other: IPoint) -> isize {
+        self.x * other.x + self.y * other.y
+    }
+
+    pub fn cross(&self, other: IPoint) -> isize {
+        self.x * other.y - self.y * other.x
+    }
 }
 
 pub struct OffsetPointsIter {
