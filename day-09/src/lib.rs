@@ -113,31 +113,31 @@ pub fn part_2(_input: &str) -> Solution {
         .collect();
 
     rectangles.sort_by(|a, b| b.area.cmp(&a.area));
+    /*
+       let max = IPoint::new(
+           points.iter().map(|p| p.y).max().unwrap() + 1,
+           points.iter().map(|p| p.x).max().unwrap() + 1,
+       );
 
-    let max = IPoint::new(
-        points.iter().map(|p| p.y).max().unwrap() + 1,
-        points.iter().map(|p| p.x).max().unwrap() + 1,
-    );
+       let mut map = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
 
-    let mut map = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
+       for line in lines.iter() {
+           for point in line.points() {
+               map[(point.x as usize, point.y as usize)] = true
+           }
+       }
 
-    for line in lines.iter() {
-        for point in line.points() {
-            map[(point.x as usize, point.y as usize)] = true
-        }
-    }
+       println!("{}", map.print_bool());
 
-    println!("{}", map.print_bool());
+       let mut inside = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
 
-    let mut inside = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
+       for point in inside.points() {
+           inside[point] =
+               point_is_on_line(&point.into(), &lines) || point_is_inside(&point.into(), &tile_lines);
+       }
 
-    for point in inside.points() {
-        inside[point] =
-            point_is_on_line(&point.into(), &lines) || point_is_inside(&point.into(), &tile_lines);
-    }
-
-    println!("{}", inside.print_bool());
-
+       println!("{}", inside.print_bool());
+    */
     for rectangle in rectangles {
         let c = IPoint {
             x: rectangle.a.x,
@@ -163,12 +163,14 @@ pub fn part_2(_input: &str) -> Solution {
         {
             continue;
         }
+        /*
         let mut chosen = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
         chosen[(rectangle.a.x as usize, rectangle.a.y as usize)] = true;
         chosen[(rectangle.b.x as usize, rectangle.b.y as usize)] = true;
         println!("{}", chosen.print_bool());
 
         println!("{} {}", rectangle.a, rectangle.b);
+         */
         return rectangle.area.into();
     }
 
@@ -267,7 +269,7 @@ mod part_2_tests {
     #[test_case(include_str!("_amogus.txt"), 54)]
     #[test_case(include_str!("_manual.txt"), 24)]
     #[test_case(include_str!("_alex.txt"), 39)]
-    #[test_case(include_str!("_reddit.txt"), 39)]
+    #[test_case(include_str!("_reddit.txt"), 30)]
     fn example_input(input: &str, expected: usize) {
         assert_eq!(part_2(input), expected.into());
     }
