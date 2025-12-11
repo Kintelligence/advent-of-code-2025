@@ -100,6 +100,28 @@ impl ILine {
         points
     }
 
+    pub fn crosses_straight(&self, other: &ILine) -> bool {
+        let self_horizontal = self.min.x == self.max.x;
+        let other_horizontal = other.min.x == other.max.x;
+
+        match (self_horizontal, other_horizontal) {
+            (true, true) => false,
+            (true, false) => {
+                other.min.x <= self.min.x
+                    && other.max.x >= self.min.x
+                    && self.min.y <= other.min.y
+                    && self.max.y >= other.min.y
+            }
+            (false, true) => {
+                other.min.y <= self.min.y
+                    && other.max.y >= self.min.y
+                    && self.min.x <= other.min.x
+                    && self.max.x >= other.min.x
+            }
+            (false, false) => false,
+        }
+    }
+
     pub fn find_intersect(&self, other: &ILine) -> Intersection {
         // Compute determinants to check relative orientation
         let d1 = ((self.max.x - self.min.x).strict_mul(other.min.y - self.min.y)

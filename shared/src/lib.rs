@@ -167,6 +167,8 @@ pub fn day_name(day: u32) -> &'static str {
         7 => "Laboratories",
         8 => "Playground",
         9 => "Movie Theater",
+        10 => "Factory",
+        11 => "Reactor",
         _ => "Unnamed",
     }
 }
@@ -176,3 +178,4 @@ pub mod math;
 pub mod misc;
 pub mod parse;
 pub mod points;
+pub mod solve;

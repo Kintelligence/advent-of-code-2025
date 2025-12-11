@@ -108,3 +108,63 @@ impl Digits for usize {
         }
     }
 }
+
+pub struct Compositions {
+    m: usize,
+    current: Vec<usize>,
+    done: bool,
+}
+
+impl Compositions {
+    pub fn new(n: usize, m: usize) -> Self {
+        let mut current = vec![0; m];
+        if m > 0 {
+            current[m - 1] = n;
+        }
+
+        Compositions {
+            m,
+            current,
+            done: m == 0, // if m == 0, no compositions exist
+        }
+    }
+}
+
+impl Iterator for Compositions {
+    type Item = Vec<usize>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            return None;
+        }
+
+        // Yield the current composition
+        let result = self.current.clone();
+
+        // Generate next composition
+        // Find the rightmost index i where current[i] > 0
+        let mut i = self.m - 1;
+        while i > 0 && self.current[i] == 0 {
+            i -= 1;
+        }
+
+        if i == 0 {
+            // We've reached the final composition
+            self.done = true;
+        } else {
+            // Move 1 from position i to position i-1
+            self.current[i] -= 1;
+            self.current[i - 1] += 1;
+
+            // Push remaining sum all the way to the right
+            let mut remainder: usize = 0;
+            for j in i..self.m {
+                remainder += self.current[j];
+                self.current[j] = 0;
+            }
+            self.current[self.m - 1] = remainder;
+        }
+
+        Some(result)
+    }
+}

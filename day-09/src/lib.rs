@@ -1,12 +1,8 @@
 #![feature(iter_advance_by)]
 use itertools::Itertools;
 use shared::{
-    grid::Grid,
     parse::Parsable,
-    points::{
-        iline::{ILine, Intersection},
-        ipoint::IPoint,
-    },
+    points::{iline::ILine, ipoint::IPoint},
     *,
 };
 
@@ -113,31 +109,7 @@ pub fn part_2(_input: &str) -> Solution {
         .collect();
 
     rectangles.sort_by(|a, b| b.area.cmp(&a.area));
-    /*
-       let max = IPoint::new(
-           points.iter().map(|p| p.y).max().unwrap() + 1,
-           points.iter().map(|p| p.x).max().unwrap() + 1,
-       );
 
-       let mut map = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
-
-       for line in lines.iter() {
-           for point in line.points() {
-               map[(point.x as usize, point.y as usize)] = true
-           }
-       }
-
-       println!("{}", map.print_bool());
-
-       let mut inside = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
-
-       for point in inside.points() {
-           inside[point] =
-               point_is_on_line(&point.into(), &lines) || point_is_inside(&point.into(), &tile_lines);
-       }
-
-       println!("{}", inside.print_bool());
-    */
     for rectangle in rectangles {
         let c = IPoint {
             x: rectangle.a.x,
@@ -163,14 +135,7 @@ pub fn part_2(_input: &str) -> Solution {
         {
             continue;
         }
-        /*
-        let mut chosen = Grid::filled(false, max.x as usize + 10, max.y as usize + 10);
-        chosen[(rectangle.a.x as usize, rectangle.a.y as usize)] = true;
-        chosen[(rectangle.b.x as usize, rectangle.b.y as usize)] = true;
-        println!("{}", chosen.print_bool());
 
-        println!("{} {}", rectangle.a, rectangle.b);
-         */
         return rectangle.area.into();
     }
 
@@ -195,7 +160,7 @@ fn inner_rectangle_is_pierced(rectangle: &Rectangle, lines: &Vec<ILine>) -> bool
         .map(|slice| ILine::new(slice[0], slice[1]))
     {
         for line in lines {
-            if line.find_intersect(&inner_line) != Intersection::None {
+            if line.crosses_straight(&inner_line) {
                 return true;
             }
         }
@@ -204,16 +169,10 @@ fn inner_rectangle_is_pierced(rectangle: &Rectangle, lines: &Vec<ILine>) -> bool
     false
 }
 
-fn point_is_on_line(point: &IPoint, lines: &Vec<ILine>) -> bool {
-    lines.iter().any(|line| line.contains(*point))
-}
-
 fn point_is_inside(point: &IPoint, tile_lines: &Vec<TileLine>) -> bool {
     let trace = ILine::new(IPoint { x: point.x, y: -1 }, *point);
     for tile_line in tile_lines {
-        if point.y >= tile_line.height
-            && tile_line.line.find_intersect(&trace) != Intersection::None
-        {
+        if point.y >= tile_line.height && tile_line.line.crosses_straight(&trace) {
             if point.y == tile_line.height {
                 return true;
             }
