@@ -8,7 +8,7 @@ extern crate shared;
 
 fn main() {
     let mut time: Duration = Duration::new(0, 0);
-    for i in 1..=49 {
+    for i in 1..=23 {
         let (function, input, id) = day(i);
         let day = id.bytes().next_number().unwrap();
 

@@ -271,6 +271,7 @@ name = "day-10"
 version = "0.1.0"
 dependencies = [
  "fxhash",
+ "itertools 0.14.0",
  "shared",
  "test-case",
 ]

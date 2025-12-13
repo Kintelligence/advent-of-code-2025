@@ -1,13 +1,13 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, PlotConfiguration};
+use criterion::{Criterion, PlotConfiguration, black_box, criterion_group, criterion_main};
 use runner::day;
-use shared::{day_name, Solution};
+use shared::{Solution, day_name};
 
 extern crate shared;
 
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("Total: All Days", |b| {
         b.iter(|| {
-            for i in 1..=24 {
+            for i in 1..=23 {
                 let (function, input, _) = day(i);
                 function(black_box(input));
             }
@@ -18,7 +18,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     group
         .plot_config(PlotConfiguration::default().summary_scale(criterion::AxisScale::Logarithmic));
 
-    for i in 1..=24 {
+    for i in 1..=23 {
         let (function, input, name) = day(i);
         if let Solution::None = function(input) {
         } else {

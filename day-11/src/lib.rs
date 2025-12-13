@@ -1,7 +1,6 @@
 #![feature(iter_advance_by)]
 use std::iter::from_fn;
 
-use fxhash::FxHashMap;
 use shared::{misc::translator::Translator, *};
 
 extern crate shared;
@@ -34,10 +33,6 @@ fn recursive_count(
 
     if i == target {
         return 1;
-    }
-
-    if i == 0 {
-        return 0;
     }
 
     let result = graph[i as usize]

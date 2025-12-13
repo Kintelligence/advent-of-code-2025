@@ -25,7 +25,6 @@ pub fn day(index: u32) -> &'static (fn(&str) -> Solution, &'static str, &'static
         21 => &(day_11::part_1, day_11::_INPUT, "11.1"),
         22 => &(day_11::part_2, day_11::_INPUT, "11.2"),
         23 => &(day_12::part_1, day_12::_INPUT, "12.1"),
-        24 => &(day_12::part_2, day_12::_INPUT, "12.2"),
         _ => panic!("Index out of bounds"),
     }
 }

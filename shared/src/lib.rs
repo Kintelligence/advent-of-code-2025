@@ -169,7 +169,8 @@ pub fn day_name(day: u32) -> &'static str {
         9 => "Movie Theater",
         10 => "Factory",
         11 => "Reactor",
-        _ => "Unnamed",
+        12 => "Reactor",
+        _ => "Christmas Tree Farm",
     }
 }
 
