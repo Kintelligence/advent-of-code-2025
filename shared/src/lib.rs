@@ -174,6 +174,7 @@ pub fn day_name(day: u32) -> &'static str {
     }
 }
 
+pub mod bitmasher;
 pub mod grid;
 pub mod math;
 pub mod misc;

@@ -84,6 +84,7 @@ fn build_tile_lines(lines: &'_ Vec<ILine>, right_oriented: bool) -> Vec<TileLine
 
 pub fn part_2(_input: &str) -> Solution {
     let points = parse(_input);
+    
     let mut lines: Vec<ILine> = points.windows(2).map(|p| ILine::new(p[0], p[1])).collect();
     lines.push(ILine::new(
         *points.last().unwrap(),

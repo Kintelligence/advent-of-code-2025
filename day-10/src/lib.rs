@@ -1,8 +1,13 @@
 #![feature(iter_advance_by)]
+use core::num;
 use fxhash::FxHashMap;
 use itertools::Itertools;
 use shared::{parse::Parsable, *};
-use std::{iter::from_fn, u64};
+use std::{
+    iter::from_fn,
+    ops::{Add, Shl, Shr, Sub},
+    u64,
+};
 
 extern crate shared;
 
@@ -130,17 +135,15 @@ pub fn part_2(_input: &str) -> Solution {
 }
 
 fn solve_line_2(machine: &Machine) -> u64 {
-    let options: Vec<(u128, u8)> = (0..=machine.buttons.len())
-        .flat_map(|k| machine.buttons.iter().combinations(k))
-        .map(|combination| {
-            (
-                combination.iter().map(|&b| *b).sum::<u128>(),
-                combination.iter().len() as u8,
-            )
-        })
-        .collect();
-
-    solve_rec(machine.total, &options, &mut FxHashMap::default()).unwrap_or(0)
+    solve_rec(
+        machine.total,
+        &(0..=machine.buttons.len())
+            .flat_map(|k| machine.buttons.iter().combinations(k))
+            .map(|c| (c.iter().map(|&b| *b).sum::<u128>(), c.iter().len() as u8))
+            .collect(),
+        &mut FxHashMap::default(),
+    )
+    .unwrap_or(0)
 }
 
 fn solve_rec(
@@ -148,18 +151,18 @@ fn solve_rec(
     options: &Vec<(u128, u8)>,
     cache: &mut FxHashMap<u128, Option<u64>>,
 ) -> Option<u64> {
-    if remaining == 0 {
-        return Some(0);
-    }
-
     if let Some(best) = cache.get(&remaining) {
         return *best;
     }
 
+    if remaining == 0 {
+        return Some(0);
+    }
+
     let best = options
         .iter()
-        .filter_map(|(sub, cost)| {
-            if let Some(result) = checked_sub(remaining, *sub)
+        .filter_map(|(sum, cost)| {
+            if let Some(result) = checked_sub(remaining, *sum)
                 && is_even(result)
                 && let Some(res) = solve_rec(result >> 1, options, cache)
             {
@@ -174,6 +177,7 @@ fn solve_rec(
     best
 }
 
+#[inline]
 fn checked_sub(input: u128, other: u128) -> Option<u128> {
     for i in 0..10 {
         let mask: u128 = 0b1111111111 << (i * 10);
@@ -184,6 +188,7 @@ fn checked_sub(input: u128, other: u128) -> Option<u128> {
     Some(input - other)
 }
 
+#[inline]
 fn is_even(input: u128) -> bool {
     for i in 0..10 {
         if (input & (0b1 << (i * 10))) > 0 {
@@ -200,6 +205,7 @@ mod part_2_tests {
 
     #[test_case(include_str!("_test.txt"), 33)]
     #[test_case(include_str!("_short.txt"), 287)]
+    #[test_case(include_str!("_panda.txt"), 19293)]
     fn example_input(input: &str, expected: u64) {
         assert_eq!(part_2(input), expected.into());
     }
